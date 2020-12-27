@@ -7,7 +7,7 @@
       <div class="text-md lg:flex-grow"></div>
       <div>
         <span v-if="loggedIn" class="mr-6 text-white font-bold"
-          >Welcome, {{ user.name }} {{ user.administrador ? 'Admin' : '' }}</span
+          >Welcome, {{ user.email }} {{ user.administrador ? "Admin" : "" }}</span
         >
         <a
           v-if="!loggedIn"
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import store from '../store'
+import store from "../store"
 
 export default {
   computed: {
@@ -45,12 +45,12 @@ export default {
     /* LOGOUT CLICK */
     logout() {
       // Call the $store.logout
-      store.dispatch('logout')
+      store.dispatch("logout")
       // display a goodbye message
-      this.$toasted.show('See you later', {
-        position: 'top-center',
+      this.$toasted.show("See you later", {
+        position: "top-center",
         duration: 1000,
-        type: 'info',
+        type: "info",
       })
     },
   },

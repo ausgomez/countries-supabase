@@ -49,22 +49,22 @@
 <script>
 export default {
   data: () => ({
-    email: 'aus@gmail.com',
-    password: 'sonic123',
+    email: "aus.gomez95@gmail.com",
+    password: "HDIUTuTMMxVUyGxlPlbo",
   }),
   methods: {
     // Login the user info
     async login() {
       try {
-        await this.$store.dispatch('login', { email: this.email, password: this.password }).then(() => {
-          console.log('redirectfgsbgiaoubguidgh')
+        await this.$store.dispatch("login", { email: this.email, password: this.password }).then(() => {
+          console.log("redirectfgsbgiaoubguidgh")
         })
       } catch (err) {
         console.error(err)
         this.$toasted.show(err, {
-          position: 'top-center',
+          position: "top-center",
           duration: 2000,
-          type: 'error',
+          type: "error",
         })
       }
     },

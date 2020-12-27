@@ -1,6 +1,7 @@
-import * as Appwrite from 'appwrite'
+import { createClient } from '@supabase/supabase-js'
 
-const appwrite = new Appwrite()
-appwrite.setEndpoint(process.env.VUE_APP_APPWRITE_ENDPOINT).setProject(process.env.VUE_APP_APPWRITE_PROJECT)
+const supabaseUrl = 'https://ddwuqjstrexeuntabrqk.supabase.co'
+const supabaseKey = process.env.VUE_APP_SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-export { appwrite }
+export { supabase }

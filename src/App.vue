@@ -16,9 +16,9 @@
 </template>
 
 <script>
-import Auth from '@/views/Login'
-import Countries from '@/views/Countries'
-import Navbar from '@/components/Navbar'
+import Auth from "@/views/Login"
+import Countries from "@/views/Countries"
+import Navbar from "@/components/Navbar"
 
 export default {
   components: {
@@ -31,8 +31,8 @@ export default {
       return this.$store.getters.user
     },
   },
-  mounted() {
-    this.$store.dispatch('checkUser')
+  async mounted() {
+    this.$store.dispatch("checkUser")
   },
 }
 </script>

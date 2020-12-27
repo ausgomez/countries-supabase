@@ -2,20 +2,18 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
 import '@/assets/css/tailwind.css'
-import axios from 'axios'
 import Toasted from 'vue-toasted'
-import { appwrite } from '@/utils'
+import { supabase } from '@/utils'
 
 Vue.use(Toasted)
 
 Vue.config.productionTip = false
 
-Vue.prototype.$appwrite = appwrite
-Vue.prototype.$baseURL = 'http://localhost:8090'
+Vue.prototype.$supabase = supabase
 
 new Vue({
   store,
-  render: function(h) {
+  render: function (h) {
     return h(App)
   },
 }).$mount('#app')

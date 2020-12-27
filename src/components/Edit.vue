@@ -68,25 +68,25 @@
 
 <script>
 export default {
-  props: ['country'],
+  props: ["country"],
   data: () => ({}),
   created() {
-    console.log('EDITING', this.country)
+    console.log("EDITING", this.country)
   },
   methods: {
     close() {
-      if (confirm('Unsaved changes will be lost')) {
-        this.$emit('close')
+      if (confirm("Unsaved changes will be lost")) {
+        this.$emit("close")
       }
     },
     submit() {
       if (this.submitCheck) {
-        this.$emit('submit', this.country)
+        this.$emit("submit", this.country)
       } else {
         this.$toasted.show(`Missing Information`, {
-          position: 'top-center',
+          position: "top-center",
           duration: 2000,
-          type: 'error',
+          type: "error",
         })
       }
     },
@@ -94,7 +94,7 @@ export default {
   computed: {
     // This will be checking if the informtation from the form is there or not
     submitCheck() {
-      return this.country.name != '' && this.country.short != '' && this.country.lang != ''
+      return this.country.name != "" && this.country.short != "" && this.country.lang != ""
     },
   },
 }

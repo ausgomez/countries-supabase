@@ -94,7 +94,7 @@
       <!-- RENDER EACH CARD FOR EACH COUNTRY -->
       <div
         v-for="(country, i) in filteredCountries"
-        :key="country.id"
+        :key="i"
         class="w-full md:w-1/3 md:pr-3 lg:pr-0 pb-6 flex justify-center"
       >
         <div class="max-w-sm rounded overflow-hidden shadow-lg bg-gray-200 relative">
@@ -106,7 +106,7 @@
           >
             <i class="bx bxs-trash"></i>
           </button>
-          <img class="w-full" :src="`https://picsum.photos/id/${100 + i}/300/100`" :alt="country.name" />
+          <img class="w-full" :src="country.photo" :alt="country.name" />
           <div class="px-6 py-4">
             <div class="font-bold text-xl mb-2 text-black">{{ country.name }} ({{ country.short }})</div>
             <p class="text-gray-700 text-base">
@@ -155,7 +155,7 @@
 </template>
 
 <script>
-import EditForm from '@/components/Edit'
+import EditForm from "@/components/Edit"
 
 export default {
   components: {
@@ -164,20 +164,20 @@ export default {
   data: () => ({
     countries: [],
     editing: false,
-    newCountry: { name: '', short: '', lang: '' },
+    newCountry: { name: "", short: "", lang: "" },
     modalToggle: false,
     currentCountry: {},
-    query: '',
+    query: "",
     loading: false,
   }),
 
   computed: {
     // This will be checking if the informtation from the form is there or not
     submitCheck() {
-      return this.newCountry.name != '' && this.newCountry.short != '' && this.newCountry.lang != ''
+      return this.newCountry.name != "" && this.newCountry.short != "" && this.newCountry.lang != ""
     },
     filteredCountries() {
-      console.log('compuyer countries')
+      console.log("query countries")
       return this.countries.filter((c) => c.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1)
     },
   },
@@ -200,25 +200,33 @@ export default {
     async updateCountry(country) {
       this.loading = true
       /* Modifying info in DB */
-      this.$appwrite.database
-        .updateDocument('5f85101c09c00', country.$id, country, ['*'], ['*'])
-        .then(() => {
-          const pos = this.countries.findIndex((p) => p.$id === this.currentCountry.$id)
+
+      await this.$supabase
+        .from("Countries")
+        .update([country])
+        .eq("id", country.id)
+        .then((res) => {
+          res = res.data[0]
+
+          const pos = this.countries.findIndex((p) => p.id === this.currentCountry.id)
+
           this.countries[pos] = country
+          this.fetchCountries()
+
           this.modalToggle = false
           this.currentCountry = {}
-          this.$toasted.show('Country Info updated!', {
-            position: 'top-center',
+          this.$toasted.show("Country Info updated!", {
+            position: "top-center",
             duration: 2000,
-            type: 'default',
+            type: "default",
           })
         })
         .catch((err) => {
           console.error(err)
-          this.$toasted.show('Something went wrong', {
-            position: 'top-center',
+          this.$toasted.show("Something went wrong", {
+            position: "top-center",
             duration: 2000,
-            type: 'error',
+            type: "error",
           })
         })
 
@@ -227,10 +235,13 @@ export default {
 
     async fetchCountries() {
       this.loading = true
-      await this.$appwrite.database.listDocuments('5f85101c09c00').then((res) => {
-        console.log(res.$permissions.write)
-        this.countries = res.documents
-      })
+
+      // SUPABASE GET COUNTRIES
+
+      let { data: Countries, error } = await this.$supabase.from("Countries").select("*")
+      this.countries = Countries
+
+      console.log(this.countries)
 
       this.loading = false
     },
@@ -240,30 +251,38 @@ export default {
       // Making sure that the form is not missing any info
       if (!this.submitCheck) {
         this.$toasted.show(`Missing Information`, {
-          position: 'top-center',
+          position: "top-center",
           duration: 2000,
-          type: 'error',
+          type: "error",
         })
         return
       }
 
-      this.$appwrite.database.createDocument('5f85101c09c00', this.newCountry, ['*'], ['*']).then((res) => {
-        this.countries.unshift({
-          name: res.name,
-          short: res.short,
-          lang: res.lang,
-        })
+      await this.$supabase
+        .from("Countries")
+        .insert([this.newCountry])
+        .then((res) => {
+          console.log("RESS", res)
 
-        // Notify the user
-        this.$toasted.show(`Country ${this.newCountry.name} added!`, {
-          position: 'top-center',
-          duration: 2000,
-          type: 'success',
-        })
+          res = res.data[0]
 
-        // Then clear the newCountry object (clear form)
-        this.newCountry = { id: 0, name: '', short: '', lang: '' }
-      })
+          this.countries.unshift({
+            name: res.name,
+            short: res.short,
+            lang: res.lang,
+            photo: res.photo,
+          })
+
+          // Notify the user
+          this.$toasted.show(`Country ${this.newCountry.name} added!`, {
+            position: "top-center",
+            duration: 2000,
+            type: "success",
+          })
+
+          // Then clear the newCountry object (clear form)
+          this.newCountry = { id: 0, name: "", short: "", lang: "" }
+        })
     },
 
     /* REMOVING A PAIS FROM THE LIST */
@@ -271,18 +290,24 @@ export default {
       // Ask the user to confirm first
       if (!confirm(`Are you sure to delete ${country.name}? 🙄`)) return
 
-      // If the user confirmed, proceed to call the Action
-      await this.$appwrite.database.deleteDocument('5f85101c09c00', country.$id).then(() => {
-        // Remove the deleted country from the local array using a simple Array filter()
-        this.countries = this.countries.filter((p) => p.$id != country.$id)
+      await this.$supabase
+        .from("Countries")
+        .delete()
+        .eq("id", country.id)
+        .then((res) => {
+          console.log("RES", res)
 
-        // Notify the user that the country is gone
-        this.$toasted.show(`${country.name} removed...`, {
-          position: 'top-center',
-          duration: 1000,
-          type: 'info',
+          res = res.data[0]
+          // Remove the deleted country from the local array using a simple Array filter()
+          this.countries = this.countries.filter((p) => p.id != country.id)
+
+          // Notify the user that the country is gone
+          this.$toasted.show(`${country.name} removed...`, {
+            position: "top-center",
+            duration: 1000,
+            type: "info",
+          })
         })
-      })
     },
   },
 }
